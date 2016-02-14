@@ -1,0 +1,4 @@
+[submodule "boxes/roles/pr-moodle"]
+        path = boxes/roles/pr-moodle
+        url = git@github.com:ThePrudents/moodle.git
+

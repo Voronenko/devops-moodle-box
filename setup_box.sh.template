@@ -1,0 +1,22 @@
+# Static parameters
+WORKSPACE=./
+BOX_PLAYBOOK=$WORKSPACE/boxes/prod.yml
+BOX_NAME=moodle_staging
+BOX_ADDRESS=192.168.0.17
+BOX_USER=youruser
+BOX_PWD=yourpass
+
+# Register the new Prudentia box, provision it with the staging artifact and eventually unregisters the box
+prudentia ssh <<EOF
+unregister $BOX_NAME
+
+register
+$BOX_PLAYBOOK
+$BOX_NAME
+$BOX_ADDRESS
+$BOX_USER
+$BOX_PWD
+
+provision $BOX_NAME
+EOF
+

@@ -1,0 +1,58 @@
+---
+- hosts: moodle-prod
+
+  vars:
+    # prudentia_dir -> is passed in the cmd line
+    - root_dir: ..
+    - env: bluemix
+
+  vars_files:
+    - '{{prudentia_dir}}/vars/global.yml'
+    - ./common_vars.yml
+
+  pre_tasks:
+    - include: '{{prudentia_dir}}/tasks/common-setup.yml'
+
+    - include: "{{prudentia_dir}}/tasks/timezone.yml tz=Europe/London"
+      tags: base
+
+    - include: "{{prudentia_dir}}/tasks/ufw.yml"
+      tags: base
+
+    - name: Moodle | Ensure multiverse repo is enabled
+      apt_repository:
+        repo: "{{item}}"
+        update_cache: false
+      register: multiverse_installed
+      when: ansible_distribution == 'Ubuntu'
+      sudo: yes
+      with_items:
+        - 'deb http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}} multiverse'
+        - 'deb-src http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}} multiverse'
+        - 'deb http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-updates multiverse'
+        - 'deb-src http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-updates multiverse'
+
+    - apt:
+        update_cache: true
+      when: multiverse_installed | changed
+      sudo: yes 
+  
+
+#  moodle_db_type: 'mysqli' #  'pgsql', 'mariadb', 'mysqli', 'mssql', 'sqlsrv' or 'oci'
+#  moodle_db_host: '{{mysql_host}}'
+#  moodle_db_name: 'moodle'
+#  moodle_db_user: 'moodle'
+#  moodle_db_pass: 'moodle'
+#  moodle_app_domain: "moodle.dev"
+
+
+  roles:
+     - {
+         role: "pr-moodle",
+         moodle_db_host: '127.0.0.1', 
+         moodle_db_name: 'moodle',
+         moodle_db_user: 'moodle',
+         moodle_db_pass: 'yoursupersecurepassword',
+         moodle_app_domain: "yourdomainname.com"
+
+       }
